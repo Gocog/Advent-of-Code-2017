@@ -27,16 +27,19 @@ public class HexGrid {
 		int maxDist = 0;
 		int dist = 0;
 		for (String direction : directions) {
+			int deltaY = 1;
 			if (direction.contains("e")) {
 				x++;
 			} else if (direction.contains("w")) {
 				x--;
+			} else {
+				deltaY = 2;
 			}
 			
 			if (direction.startsWith("n")) {
-				y++;
+				y+=deltaY;
 			} else {
-				y--;
+				y-=deltaY;
 			}
 			
 			dist = getSteps(x,y);
@@ -60,8 +63,19 @@ public class HexGrid {
 		
 		x = Math.abs(x);
 		y = Math.abs(y);
+		int steps = 0;
+		if (x > y) {
+			steps = x;
+		} else {
+			// Move horizontally until directly above/below.
+			steps = x;
+			y -= x;
+			
+			// Move up/down in steps of 2.
+			steps += y/2;
+		}
 
-		return x > y ? x : y;
+		return steps;
 	}
 	
 	/** Returns a String array containing all the directions */
