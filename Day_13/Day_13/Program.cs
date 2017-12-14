@@ -4,20 +4,15 @@ using System.IO;
 
 namespace Day_13
 {
-    class PacketScanners
+    public class PacketScanners
     {
-		static void Main(string[] args) {
-			string puzzlepath = "puzzleinput.txt";
-			Console.WriteLine("Packet Scanners puzzle");
+		private int[] ranges;
+		public PacketScanners(string path) {
+			GetInputListFromFile(path);
+		}
 
-			int[] ranges = GetInputListFromFile(puzzlepath);
-			int severity = GetSeverity(ranges);
-			Console.WriteLine("First task: " + severity);
-
-			int delay = BruteForceGetSafeTime(ranges);
-			Console.WriteLine("Second task: " + delay);
-
-			Console.Read();
+		public PacketScanners(int[] _ranges) {
+			ranges = _ranges;
 		}
 
 		/// <summary>
@@ -26,12 +21,12 @@ namespace Day_13
 		/// </summary>
 		/// <param name="ranges">The scanner ranges indexed by depth.</param>
 		/// <returns>The delay in picoseconds required to not get caught.</returns>
-		public static int BruteForceGetSafeTime(int[] ranges) {
+		public int BruteForceGetSafeTime() {
 			int delay = 0;
 			bool caught = false;
 			do {
 				delay++;
-				caught = GetCaught(ranges, delay);
+				caught = GetCaught(delay);
 			} while (caught);
 			return delay;
 		}
@@ -40,10 +35,9 @@ namespace Day_13
 		/// Checks if you are caught when running through the firewall
 		/// after the waiting the given delay.
 		/// </summary>
-		/// <param name="ranges">The scanner ranges indexed by depth.</param>
 		/// <param name="delay">The number of picoseconds to wait before starting.</param>
 		/// <returns>True if caught, false otherwise.</returns>
-		public static bool GetCaught(int[] ranges, int delay) {
+		public bool GetCaught(int delay) {
 			int time;
 			int range;
 			int steps;
@@ -64,9 +58,8 @@ namespace Day_13
 		/// <summary>
 		/// Gets the total severity of running through the firewall.
 		/// </summary>
-		/// <param name="ranges">The scanner ranges indexed by depth.</param>
 		/// <returns>Sum of severities from being discovered.</returns>
-		public static int GetSeverity(int[] ranges) {
+		public int GetSeverity() {
 			int severity = 0;
 			int time;
 			int range;
@@ -90,8 +83,7 @@ namespace Day_13
 		/// sets the length of the array, missing indices are set to 0.
 		/// </summary>
 		/// <param name="path">The file path.</param>
-		/// <returns>List of integers found in file.</returns>
-		private static int[] GetInputListFromFile(string path) {
+		private void GetInputListFromFile(string path) {
 			string[] lines = File.ReadAllLines(path);
 			string[] segments;
 			Dictionary<int, int> input = new Dictionary<int, int>();
@@ -108,7 +100,22 @@ namespace Day_13
 			for (int i = 0; i < inputlist.Length; i++) {
 				input.TryGetValue(i, out inputlist[i]);
 			}
-			return inputlist;
+			int[] ranges = inputlist;
 		}
-    }
+
+		static void Main(string[] args) {
+			string puzzlepath = "puzzleinput.txt";
+			Console.WriteLine("Packet Scanners puzzle");
+
+			PacketScanners ps = new PacketScanners(puzzlepath);
+			
+			int severity = ps.GetSeverity();
+			Console.WriteLine("First task: " + severity);
+
+			int delay = ps.BruteForceGetSafeTime();
+			Console.WriteLine("Second task: " + delay);
+
+			Console.Read();
+		}
+	}
 }

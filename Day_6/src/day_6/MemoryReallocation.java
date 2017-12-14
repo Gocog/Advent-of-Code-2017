@@ -1,57 +1,44 @@
 package day_6;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 
 public class MemoryReallocation {
-	private String puzzlepath = "src/puzzleinput.txt";
-
-	public MemoryReallocation() {
-		int[] memory = getMemoryFromFile(puzzlepath);
-		
-		System.out.println("Memory Reallocation puzzle");
-		
-		CycleInfoStruct lis = getCycleInfo(memory);
-		int redistributionCycles = lis.cycles;
-		int loopSize = lis.loopSize;
-		
-		System.out.println("First task: "+redistributionCycles);
-		System.out.println("Second task: "+loopSize);
-		
-		try {
-			System.in.read();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	private int[] memory;
+	public CycleInfoStruct cycleinfo;
+	
+	public MemoryReallocation(String path) {
+		memory = getMemoryFromFile(path);
+		cycleinfo = getCycleInfo();
 	}
 	
-	/** Calculates the number of redistribution cycles required before a repeat configuration appears.
-	 * @param _memory	An integer array representing the initial memory configuration. Is not overwritten.
-	 * */
-	private static CycleInfoStruct getCycleInfo(int[] _memory) {
+	public MemoryReallocation(int[] _memory) {
+		memory = _memory;
+		cycleinfo = getCycleInfo();
+	}
+	
+	/** Calculates the number of redistribution cycles required before a repeat configuration appears. */
+	private CycleInfoStruct getCycleInfo() {
 		// Don't overwrite the original memory
-		int[] memory = _memory.clone();
+		int[] memoryCopy = memory.clone();
 		
 		HashMap<String,Integer> occurrences = new HashMap<String, Integer>();
 		int cycles = 0;
 		do {
 			
 			// Save the current state to the occurences map.
-			occurrences.put(getHash(memory), cycles);
+			occurrences.put(getHash(memoryCopy), cycles);
 			
 			// Reallocate memory.
-			reallocate(memory);
+			reallocate(memoryCopy);
 			cycles++;
 			
 			// Repeat only if the current memory configuration has not occurred before.
-		} while(occurrences.getOrDefault(getHash(memory), 0) == 0);
+		} while(occurrences.getOrDefault(getHash(memoryCopy), 0) == 0);
 		
-		int loopSize = cycles - (occurrences.get(getHash(memory))); 
+		int loopSize = cycles - (occurrences.get(getHash(memoryCopy))); 
 		
 		return new CycleInfoStruct(cycles,loopSize);
 	}
@@ -77,7 +64,9 @@ public class MemoryReallocation {
 	}
 	
 	/** Returns the index of the largest element in the array. If multiple elements are equally large
-	 	it returns the first of them. */
+	 	it returns the first of them. 
+	 	@param array The array to search.
+	 	@return The index of the largest number. The first index if tied. */
 	private static int indexOfLargest(int[] array) {
 		int largest = 0;
 		for (int current = 0; current < array.length; current++) {
@@ -88,9 +77,11 @@ public class MemoryReallocation {
 		return largest;
 	}
 	
-	/** Returns an integer array representing the memory stored in the file at the specified path. */
+	/** Returns an integer array representing the memory stored in the file at the specified path. 
+	 	@param path The path of the file to read from.
+	 	@return The int array representing the memory. */
 	private static int[] getMemoryFromFile(String path) {
-		BufferedReader reader = new BufferedReader(getFileReader(path));
+		BufferedReader reader = new BufferedReader(file.FileUtil.getFileReader(path));
 		String delimiter = "	";
 		// Read all lines from file. Should only be one.
 		String[] lines = reader.lines().toArray(String[]::new);
@@ -101,29 +92,21 @@ public class MemoryReallocation {
 		return result;
 	}
 	
-	/** Gets a FileReader that reads from the file at the specified path. */
-	private static FileReader getFileReader(String path) {
+	public static void main(String[] args) {
+		String puzzlepath = "src/puzzleinput.txt";
+		
+		System.out.println("Memory Reallocation puzzle");
+		MemoryReallocation mr = new MemoryReallocation(puzzlepath);
+		int redistributionCycles = mr.cycleinfo.getCycles();
+		int loopSize = mr.cycleinfo.getLoopSize();
+		
+		System.out.println("First task: "+redistributionCycles);
+		System.out.println("Second task: "+loopSize);
+		
 		try {
-			File inputfile = new File(path);
-			return new FileReader(inputfile);
-		} catch (FileNotFoundException e) {
-			System.err.println("File not found at path "+ path);
+			System.in.read();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;
 	}
-	
-	public static void main(String[] args) {
-		new MemoryReallocation();
-	}
-}
-
-/** Type for containing information about memory cycles. */
-class CycleInfoStruct {
-	public CycleInfoStruct(int _cycles, int _loopSize) {
-		cycles = _cycles;
-		loopSize = _loopSize;
-	}
-	public int cycles;
-	public int loopSize;
 }

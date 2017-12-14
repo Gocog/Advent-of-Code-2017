@@ -1,27 +1,14 @@
 package day_11;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 
 public class HexGrid {
-	private String puzzlepath = "src/puzzleinput.txt";
-	
-	public HexGrid() {
-		String[] directions = getDirectionsFromFile(puzzlepath);
-		
-		HexGridNavInfo result = getNavInfo(directions);
-
-		System.out.println("First task: " + result.steps);
-		System.out.println("Second task: " + result.maxDist);
-	}
-	
 	/** Gets a HexGridNavInfo object containing the minimum number of steps required
 	 	to reach the destination the directions array point to, and the maximum distance
 	 	from the starting position reached while following the directions. 
-	 	@param directions The array of Strings indicating the direction to take each turn.*/
-	HexGridNavInfo getNavInfo(String[] directions) {
+	 	@param directions The array of Strings indicating the direction to take each turn.
+	 	@return The HexGridNavInfo object containing information about the path.*/
+	public static HexGridNavInfo getNavInfo(String[] directions) {
 		int x = 0;
 		int y = 0;
 		int maxDist = 0;
@@ -53,14 +40,9 @@ public class HexGrid {
 	
 	/** Returns the distance from origin in a hex grid.  
 	 	@param x The x coordinate in the hex grid.
-	 	@param y The y coordinate in the hex grid.*/
-	int getSteps(int x, int y) {
-		/* In a hex grid using axial coordinates, the distance
-			between two points is simply the largest coordinate
-			delta between them. For distance to origin, that means
-			simply the largest coordinate component.
-		*/
-		
+	 	@param y The y coordinate in the hex grid.
+	 	@return The number of steps to go.*/
+	public static int getSteps(int x, int y) {
 		x = Math.abs(x);
 		y = Math.abs(y);
 		int steps = 0;
@@ -78,9 +60,9 @@ public class HexGrid {
 		return steps;
 	}
 	
-	/** Returns a String array containing all the directions */
-	private String[] getDirectionsFromFile(String path) {
-		BufferedReader reader = new BufferedReader(getFileReader(path));
+	/** Returns a String array containing all the directions. */
+	public static String[] getDirectionsFromFile(String path) {
+		BufferedReader reader = new BufferedReader(file.FileUtil.getFileReader(path));
 		String delimiter = ",";
 		// Read all lines from file. Should only be one.
 		String[] lines = reader.lines().toArray(String[]::new);
@@ -89,21 +71,18 @@ public class HexGrid {
 		
 		return directionStrings;
 	}
-	
-	/** Gets a FileReader that reads from the file at the specified path. */
-	private FileReader getFileReader(String path) {
-		try {
-			File inputfile = new File(path);
-			return new FileReader(inputfile);
-		} catch (FileNotFoundException e) {
-			System.err.println("File not found at path "+ path);
-			e.printStackTrace();
-		}
-		return null;
-	}
+
 	
 	public static void main(String[] args) {
-		new HexGrid();
+		String puzzlepath = "src/puzzleinput.txt";
+		
+		System.out.println("Hex Ed puzzle");
+		String[] directions = getDirectionsFromFile(puzzlepath);
+		
+		HexGridNavInfo result = getNavInfo(directions);
+
+		System.out.println("First task: " + result.getSteps());
+		System.out.println("Second task: " + result.getMaxDist());
 	}
 }
 

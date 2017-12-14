@@ -2,21 +2,19 @@
 #include "Registers.h"
 
 
-Registers::Registers() {
-	std::cout << "Registers puzzle";
-	std::vector<Instruction> instructions = getInstructionList(puzzlepath);
-	std::pair<std::map<std::string, int>, int> registerPair = parseInstructionList(instructions);
-	std::cout << "First task: " << largestValue(registerPair.first) << "\n";
-	std::cout << "Second task: " << registerPair.second;
-
-	std::cin.get();
+Registers::Registers(const std::string &path) {
+	getInstructionListFromFile(path);
+	parseInstructionList();
 }
 
-/* Takes a vector of Instructions and returns a pair: a map from string to int of final registry values, and an int representing
-	the maximum value any register reached during execution of the instructions.*/
-std::pair<std::map<std::string, int>, int> Registers::parseInstructionList(const std::vector<Instruction> & instructions) {
-	std::map<std::string, int> registerMap;
-	int maxValue = INT_MIN;
+Registers::Registers(const std::vector<Instruction> &_instructions) {
+	instructions = _instructions;
+	parseInstructionList();
+}
+
+/* Parses the instructions in the instructions vector and updates the registers..*/
+void Registers::parseInstructionList() {
+	maxValue = INT_MIN;
 
 	for (const Instruction & ins : instructions) {
 
@@ -31,12 +29,10 @@ std::pair<std::map<std::string, int>, int> Registers::parseInstructionList(const
 			maxValue = registerMap[ins.reg];
 		}
 	}
-
-	return std::pair<std::map<std::string, int>, int>(registerMap, maxValue);
 }
 
 /* Gets the largest value contained in the registry. */
-int Registers::largestValue(const std::map<std::string, int> &registerMap) {
+int Registers::getLargestValue() {
 	int largestValue = INT_MIN;
 
 	for (const std::pair<std::string, int> & p : registerMap) {
@@ -48,8 +44,13 @@ int Registers::largestValue(const std::map<std::string, int> &registerMap) {
 	return largestValue;
 }
 
-/*	Given a file path, return a vector of line-separated strings in that file. */
-std::vector<Instruction> Registers::getInstructionList(const std::string &path) {
+/* Gets the maximum value that any register has had during the execution of instructions. */
+int Registers::getMaximumValue() {
+	return maxValue;
+}
+
+/*	Loads the instructions from a file at the specified path. */
+void Registers::getInstructionListFromFile(const std::string &path) {
 	std::string line;
 	std::vector<std::string> lines;
 	std::ifstream inputFile;
@@ -62,12 +63,10 @@ std::vector<Instruction> Registers::getInstructionList(const std::string &path) 
 	inputFile.close();
 
 	// Generate instructions from all the lines.
-	std::vector<Instruction> instructions;
+	instructions = std::vector<Instruction>();
 	std::vector<std::string>::iterator it = lines.begin();
 	while (it != lines.end()) {
 		instructions.push_back(Instruction(*it));
 		it++;
 	}
-
-	return instructions;
 }

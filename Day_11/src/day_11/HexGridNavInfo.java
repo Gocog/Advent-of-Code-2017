@@ -6,6 +6,14 @@ public class HexGridNavInfo {
 		steps = _steps;
 		maxDist = _maxDist;
 	}
-	public int steps;
-	public int maxDist;
+	private int steps;
+	private int maxDist;
+	
+	public int getSteps() {
+		return steps;
+	}
+	
+	public int getMaxDist() {
+		return maxDist;
+	}
 }

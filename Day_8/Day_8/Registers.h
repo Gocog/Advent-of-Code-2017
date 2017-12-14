@@ -8,11 +8,15 @@
 
 class Registers {
 public:
-	Registers();
+	Registers(const std::string &path);
+	Registers(const std::vector<Instruction> &_instructions);
+	int getLargestValue();
+	int getMaximumValue();
 private:
-	static std::vector<Instruction> getInstructionList(const std::string &path);
-	static std::pair<std::map<std::string, int>, int> parseInstructionList(const std::vector<Instruction> & instructions);
-	static int largestValue(const std::map<std::string, int> &registerMap);
-	std::string puzzlepath = "puzzleinput.txt";
+	void getInstructionListFromFile(const std::string &path);
+	void parseInstructionList();
+	std::vector<Instruction> instructions;
+	std::map<std::string, int> registerMap;
+	int maxValue = 0;
 };
 

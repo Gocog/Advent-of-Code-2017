@@ -6,18 +6,11 @@ namespace Day_5
 {
     class TrampolineMaze
     {
-		private string puzzlepath = @"puzzleinput.txt";
+		private int[] jumpList;
 		public delegate int ListUpdateFunctionDelegate(int stepSize);
 
-		public TrampolineMaze() {
-			Console.WriteLine("A Maze of Twisty Trampolines, All Alike");
-			int[] jumpList = GetJumpListFromFile(puzzlepath);
-			// Gets the steps required when adding one to each position after moving.
-			Console.WriteLine("First task: " + GetSteps(jumpList, AddOne));
-			// Gets the steps required when adding one for values under 3 and -1 otherwise after moving.
-			Console.WriteLine("Second task: " + GetSteps(jumpList, AddUnder3ElseRemove));
-
-			Console.Read();
+		public TrampolineMaze(string path) {
+			jumpList = GetJumpListFromFile(path);
 		}
 
 		/// <summary>
@@ -25,19 +18,19 @@ namespace Day_5
 		///	moves the position by the value in the list at that position. After moving,
 		///	the position you moved from has its value set according to the provided update function.
 		///	</summary>
-		public int GetSteps(int[] _jumpList, ListUpdateFunctionDelegate updateFunc) {
+		public int GetSteps(ListUpdateFunctionDelegate updateFunc) {
 			// Make a copy of the list so we don't change the original.
-			int[] jumpList = new int[_jumpList.Length];
-			_jumpList.CopyTo(jumpList,0);
+			int[] jumpListCopy = new int[jumpList.Length];
+			jumpList.CopyTo(jumpListCopy,0);
 
 			// Initialise position to the start (0), and step counter to 0.
 			int position = 0;
 			int steps = 0;
 
 			// Update our position until it is no longer inside the list.
-			while (position < jumpList.Length && position >= 0) {
-				int newposition = position + jumpList[position];
-				jumpList[position] = updateFunc(jumpList[position]);
+			while (position < jumpListCopy.Length && position >= 0) {
+				int newposition = position + jumpListCopy[position];
+				jumpListCopy[position] = updateFunc(jumpListCopy[position]);
 				position = newposition;
 				steps++;
 			}
@@ -48,14 +41,14 @@ namespace Day_5
 		/// <summary>
 		/// Adds 1 to the value.
 		/// </summary>
-		private int AddOne(int value) {
+		public static int AddOne(int value) {
 			return value + 1;
 		}
 
 		/// <summary>
 		/// Adds 1 to the value, unless value is 3 or more, then subtracts 1.
 		/// </summary>
-		private int AddUnder3ElseRemove(int value) {
+		public static int AddUnder3ElseRemove(int value) {
 			return value + (value < 3 ? 1 : -1);
 		}
 
@@ -69,7 +62,16 @@ namespace Day_5
 		}
 
 		static void Main(string[] args) {
-			new TrampolineMaze();
+			string puzzlepath = @"puzzleinput.txt";
+			TrampolineMaze tm = new TrampolineMaze(puzzlepath);
+
+			Console.WriteLine("A Maze of Twisty Trampolines, All Alike");
+			// Gets the steps required when adding one to each position after moving.
+			Console.WriteLine("First task: " + tm.GetSteps(AddOne));
+			// Gets the steps required when adding one for values under 3 and -1 otherwise after moving.
+			Console.WriteLine("Second task: " + tm.GetSteps(AddUnder3ElseRemove));
+
+			Console.Read();
 		}
 	}
 }

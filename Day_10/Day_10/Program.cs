@@ -1,31 +1,36 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
 namespace Day_10
 {
-    class KnotHash
+    public class KnotHash
     {
 		private const int SPARSELENGTH = 256;
 		private const int DENSEFACTOR = 16;
 		private readonly int[] tailstring = { 17, 31, 73, 47, 23 };
-		private string puzzlepath = @"puzzleinput.txt";
 
-		public KnotHash() {
-			Console.WriteLine("Knot Hash puzzle");
+		private int[] m_sparsehash;
+		public ReadOnlyCollection<int> SparseHash { get { return Array.AsReadOnly(m_sparsehash); } }
+		private string m_hash;
+		public string Hash { get { return m_hash; } private set { m_hash = value; } }
 
-			Console.Write("First task: ");
-			int[] input = GetInputListFromFile(puzzlepath,false);
-			int[] knothashlist = GenerateSparseHash(input, 1);
-			int result = knothashlist[0] * knothashlist[1];
-			Console.WriteLine(result);
+		public KnotHash(string input, bool asByte, int rounds) {
+			int[] inputlist = asByte ? GetInputListFromStringAsByte(input,true) : GetInputListFromString(input, false);
+			m_sparsehash = GenerateSparseHash(inputlist, rounds);
+			Hash = GenerateKnotHash();
+		}
 
-			Console.Write("Second task: ");
-			input = GetInputListFromFileAsByte(puzzlepath,true);
-			string hash = GenerateKnotHash(GenerateSparseHash(input, 64));
-			Console.WriteLine(hash);
+		/// <summary>
+		/// Returns the value of this KnotHash represented as a string of 4-bit binary numbers.
+		/// </summary>
+		/// <returns>String of joined 4-bit binary numbers representing the hash.</returns>
+		public string AsBinaryHash() {
+			// Convert each character to int from hex, then convert the int to 4-bit binary. Join together all numbers to one string.
+			string binaryhash = String.Join("",Hash.Select(c => Convert.ToString(Convert.ToInt32(c.ToString(), 16), 2).PadLeft(4,'0')));
 
-			Console.Read();
+			return binaryhash;
 		}
 
 		/// <summary>
@@ -34,14 +39,14 @@ namespace Day_10
 		/// </summary>
 		/// <param name="sparsehash">The sparse hash int array.</param>
 		/// <returns>String representing the final hash.</returns>
-		public string GenerateKnotHash(int[] sparsehash) {
+		public string GenerateKnotHash() {
 			int factor = DENSEFACTOR;
 			string hashstring = "";
 
-			for (int i = 0; i < (sparsehash.Length / factor); i++) {
+			for (int i = 0; i < (SparseHash.Count / factor); i++) {
 				int num = 0;
 				for (int j = 0; j < factor; j++) {
-					num ^= sparsehash[i * factor + j];
+					num ^= SparseHash[i * factor + j];
 				}
 				hashstring += num.ToString("X2");
 			}
@@ -56,7 +61,7 @@ namespace Day_10
 		/// <param name="input">The array of integers used as parameter for each operation.</param>
 		/// <param name="rounds">The number of times to run through the input list.</param>
 		/// <returns></returns>
-		public int[] GenerateSparseHash(int[] input, int rounds) {
+		private int[] GenerateSparseHash(int[] input, int rounds) {
 			int length = SPARSELENGTH;
 			int[] sparse = Enumerable.Range(0, length).ToArray();
 			int position = 0;
@@ -83,13 +88,12 @@ namespace Day_10
 		}
 
 		/// <summary>
-		/// Gets the list of comma-separated integers from the given file.
+		/// Gets the list of comma-separated integers from the given string.
 		/// </summary>
-		/// <param name="path">The file path.</param>
+		/// <param name="input">The string.</param>
 		/// <param name="addsuffix">Whether to append the standard suffix to the array.</param>
-		/// <returns>List of integers found in file.</returns>
-		private int[] GetInputListFromFile(string path, bool addsuffix) {
-			string input = File.ReadAllText(path);
+		/// <returns>List of integers found in string.</returns>
+		private int[] GetInputListFromString(string input, bool addsuffix) {
 			int[] inputlist = input.Split(',').Select(s => Convert.ToInt32(s)).ToArray();
 
 			if (addsuffix) {
@@ -100,13 +104,12 @@ namespace Day_10
 
 		/// <summary>
 		/// Gets an array of integers representing the numerical value of
-		/// each character in the file.
+		/// each character in the string.
 		/// </summary>
-		/// <param name="path">The file path.</param>
+		/// <param name="input">The string.</param>
 		/// <param name="addsuffix">Whether to append the standard suffix to the array.</param>
-		/// <returns>List of integers representing the file's contents.</returns>
-		public int[] GetInputListFromFileAsByte(string path, bool addsuffix) {
-			string input = File.ReadAllText(path);
+		/// <returns>List of integers representing the string's contents.</returns>
+		private int[] GetInputListFromStringAsByte(string input, bool addsuffix) {
 			int[] inputlist = input.Select(s => Convert.ToInt32(s)).ToArray();
 
 			if (addsuffix) {
@@ -129,7 +132,21 @@ namespace Day_10
 		}
 
 		static void Main(string[] args) {
-			new KnotHash();
+			string puzzlepath = @"puzzleinput.txt";
+			string input = File.ReadAllText(puzzlepath);
+
+			Console.WriteLine("Knot Hash puzzle");
+
+			Console.Write("First task: ");
+			KnotHash kh = new KnotHash(input, false, 1);
+			int result = kh.SparseHash[0] * kh.SparseHash[1];
+			Console.WriteLine(result);
+
+			Console.Write("Second task: ");
+			kh = new KnotHash(input, true, 64);
+			Console.WriteLine(kh.Hash);
+
+			Console.Read();
 		}
 	}
 }
